@@ -1,4 +1,4 @@
-const BASE_URL = "https://pokeapi.co/api/v2"
+const BASE_API_URL = "https://pokeapi.co/api/v2"
 
 document.addEventListener("DOMContentLoaded", () => {
     getPokemonList(151)
@@ -20,9 +20,9 @@ function filterList () {
     })
 }
 
-// Get number of pokemons
+// Get list of pokemons
 async function getPokemonList(limit) {
-    const resp = await fetch(`${BASE_URL}/pokemon?limit=${limit}`)
+    const resp = await fetch(`${BASE_API_URL}/pokemon?limit=${limit}`)
     const data = await resp.json()
 
     for (let pokemon of data.results) {
@@ -71,10 +71,7 @@ createPokemonCard = (name, image, stats, id) => {
 
     const cardBody = document.createElement("div")
     cardBody.className = "card-body"
-
-    const cardFooter = document.createElement("div")
-    cardFooter.className = "card-footer fw-bold fs-5"
-    cardFooter.innerHTML = id
+    
 
     const cardStats = document.createElement("div")
     cardStats.className = "container"
@@ -86,24 +83,28 @@ createPokemonCard = (name, image, stats, id) => {
         const statName = stat.stat.name
         const statValue = stat.base_stat        
 
-        const statElement = document.createElement("p")
-        statElement.className = "text-muted"
-        statElement.innerText = statName.toUpperCase()
+        const statNameElement = document.createElement("p")
+        statNameElement.className = "text-muted"
+        statNameElement.innerText = statName.toUpperCase()
 
         const statValueElement = document.createElement("p")
         statValueElement.className = "fw-bold"
         statValueElement.innerText = statValue
 
-        statRow.append(statElement)
+        statRow.append(statNameElement)
         statRow.append(statValueElement)
 
         cardStats.append(statRow)
     })
-    
-    // Card
+
+    // Card body
     cardBody.append(cardTitle)
     cardBody.append(cardStats)
 
+    const cardFooter = document.createElement("div")
+    cardFooter.className = "card-footer fw-bold fs-5"
+    cardFooter.innerHTML = id
+    
     // Card
     card.append(cardImage)
     card.append(cardBody)
