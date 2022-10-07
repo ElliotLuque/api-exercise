@@ -1,66 +1,113 @@
 const BASE_URL = "https://pokeapi.co/api/v2"
 
-getPokemons(151)
+document.addEventListener("DOMContentLoaded", () => {
+    getPokemonList(151)
+})
 
-async function getPokemons(limit) {
-    const response = await fetch(BASE_URL + `/pokemon?limit=${limit}`).catch(err => alert(err))
-    const data = await response.json()
+// Filter pokemons by name
+document.getElementById("search").addEventListener("keyup", filterList)
+function filterList () {
+    const input = document.getElementById("search")
+    const filter = input.value.toUpperCase()
+    const cards = document.getElementsByClassName("card")
 
-    const pokemonArray = data.results
+    Array.from(cards).forEach(card => {
+        const pokemonName = card.getElementsByClassName("card-title")[0]
 
-    pokemonArray.forEach(pokemon => {   
-        fetch(BASE_URL + `/pokemon/${pokemon.name}`)
-        .then(response => response.json())
-        .then(pkmData => {
-            const name = pkmData.name
-            const image = pkmData.sprites.front_default
-            const stats = pkmData.stats
-
-            document.getElementById("content").append(createPokemonCard(name, image, stats))
-        })
+        pokemonName.innerText.toUpperCase().indexOf(filter) > -1 
+        ? card.style.display = "" 
+        : card.style.display = "none"
     })
 }
 
-createPokemonCard = (name, image, stats) => {
+// Get number of pokemons
+async function getPokemonList(limit) {
+    const resp = await fetch(`${BASE_URL}/pokemon?limit=${limit}`)
+    const data = await resp.json()
+
+    for (let pokemon of data.results) {
+        await getPokemonData(pokemon)
+    }
+}
+
+// Get all data from a single pokemon
+async function getPokemonData(pokemon) {
+    const resp = await fetch(pokemon.url)
+    const data = await resp.json()
+
+    // Card data
+    const name = data.name.charAt(0).toUpperCase() + data.name.slice(1) // Uppercase first letter
+    const image = data.sprites.front_default
+    const stats = data.stats
+    const id = data.id
+
+    const card = createPokemonCard(name, image, stats, id)
+    document.getElementById("content").appendChild(card)
+}
+
+createPokemonCard = (name, image, stats, id) => {
+    
+    // ID naming
+    if (id < 10) {
+        id = `#00${id}`
+    } else if (id < 100) {
+        id = `#0${id}`
+    } else {
+        id = `#${id}`
+    }
+
     const card = document.createElement("div")
-    card.className = "card m-4 col-3"
+    card.className = "card m-3"
+    card.style = "width: 25rem;"
 
     const cardImage = document.createElement("img")
-    cardImage.className = "card-image"
     cardImage.width = 200
     cardImage.src = image
-
+    cardImage.className = "card-img-top"
+    
     const cardTitle = document.createElement("h2")
-    cardTitle.className = "card-title"
+    cardTitle.className = "card-title mb-4"
     cardTitle.innerText = name
 
+    const cardBody = document.createElement("div")
+    cardBody.className = "card-body"
+
+    const cardFooter = document.createElement("div")
+    cardFooter.className = "card-footer fw-bold fs-5"
+    cardFooter.innerHTML = id
+
     const cardStats = document.createElement("div")
-    cardStats.className = "card-stats"
+    cardStats.className = "container"
 
     stats.forEach(stat => {
+        const statRow = document.createElement("div")
+        statRow.className = "d-flex justify-content-between"
+
         const statName = stat.stat.name
-        const statValue = stat.base_stat
+        const statValue = stat.base_stat        
 
-        const statContainer = document.createElement("div")
-        statContainer.className = "stat-container"
-
-        const statNameElement = document.createElement("p")
-        statNameElement.className = "stat-name"
-        statNameElement.innerText = statName.toUpperCase()
+        const statElement = document.createElement("p")
+        statElement.className = "text-muted"
+        statElement.innerText = statName.toUpperCase()
 
         const statValueElement = document.createElement("p")
-        statValueElement.className = "stat-value"
+        statValueElement.className = "fw-bold"
         statValueElement.innerText = statValue
 
-        statContainer.append(statNameElement)
-        statContainer.append(statValueElement)
+        statRow.append(statElement)
+        statRow.append(statValueElement)
 
-        cardStats.append(statContainer)
+        cardStats.append(statRow)
     })
+    
+    // Card
+    cardBody.append(cardTitle)
+    cardBody.append(cardStats)
 
+    // Card
     card.append(cardImage)
-    card.append(cardTitle)
-    card.append(cardStats)
+    card.append(cardBody)
+    card.append(cardFooter)
 
     return card
 }
