@@ -1,8 +1,10 @@
 const BASE_API_URL = "https://pokeapi.co/api/v2"
 
-document.addEventListener("DOMContentLoaded", () => {
-    getPokemonList(151)
-})
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", getPokemonList)
+} else {
+    getPokemonList()
+}
 
 // Filter pokemons by name
 document.getElementById("search").addEventListener("keyup", filterList)
@@ -21,7 +23,8 @@ function filterList () {
 }
 
 // Get list of pokemons
-async function getPokemonList(limit) {
+async function getPokemonList() {
+    const limit = 151
     const resp = await fetch(`${BASE_API_URL}/pokemon?limit=${limit}`)
     const data = await resp.json()
 
