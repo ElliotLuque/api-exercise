@@ -1,10 +1,8 @@
 const BASE_API_URL = "https://pokeapi.co/api/v2"
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", getPokemonList)
-} else {
+document.addEventListener("DOMContentLoaded", () => {
     getPokemonList()
-}
+})
 
 // Filter pokemons by name
 document.getElementById("search").addEventListener("keyup", filterList)
